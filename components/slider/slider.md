@@ -229,6 +229,7 @@ Verify against `components/slider/slider.html`. Toggle dark mode with the button
 - [ ] Arrow keys move ±1 step (0–100)
 - [ ] Home key → 0, End key → 100
 - [ ] `dx-state-disabled` on root blocks all pointer and keyboard events
+- [ ] `cursor: not-allowed` visible on hover over any part of the disabled slider (track, range, handle, label area)
 - [ ] No tabindex on handle when disabled
 
 **Spacing verification:**

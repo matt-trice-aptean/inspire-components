@@ -316,6 +316,10 @@
     /* ==========================================================
        STATE: Disabled
     ========================================================== */
+    .dx-state-disabled {
+      cursor: not-allowed; /* applied to root so entire component area shows not-allowed */
+    }
+
     .dx-state-disabled .dx-slider-track {
       background: var(--slider-track-bg-disabled);
     }
@@ -328,11 +332,12 @@
       background: var(--slider-handle-bg-disabled);
       box-shadow: inset 0 0 0 var(--slider-handle-stroke-width) var(--slider-handle-stroke-disabled);
       cursor: not-allowed;
-      pointer-events: none;
+      /* no pointer-events: none — cursor would not display; JS guard prevents interaction */
     }
 
     .dx-state-disabled .dx-slider-handle:hover {
       background: var(--slider-handle-bg-disabled);
+      cursor: not-allowed;
     }
 
     .dx-state-disabled .dx-slider-label {
@@ -555,6 +560,8 @@
   <span class="code-attr">--slider-handle-bg-active</span>:           <span class="code-string">var(--color-border-emphasis)</span>;
   <span class="code-attr">--slider-handle-bg-disabled</span>:         <span class="code-string">var(--color-text-disabled)</span>;    <span class="code-comment">/* → #cfcece */</span>
   <span class="code-attr">--slider-handle-stroke-disabled</span>:     <span class="code-string">var(--color-surface-disabled)</span>; <span class="code-comment">/* → #f2f2f2 */</span>
+  <span class="code-comment">/* cursor: not-allowed on .dx-state-disabled root — pointer-events: none omitted
+     so the cursor is visible; JS initSlider() guard prevents interaction */</span>
 
   <span class="code-comment">/* Label */</span>
   <span class="code-attr">--slider-label-text</span>:                 <span class="code-string">var(--color-text-default)</span>;

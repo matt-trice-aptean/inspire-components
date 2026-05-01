@@ -12,9 +12,9 @@ Each component lives in its own subdirectory: `components/[id]/`.
 
 ## Components
 
-| Component | ID | Status | Figma Node | Prototype | Spec |
+| Component | ID | Status | Live Demo | Spec | Figma |
 |---|---|---|---|---|---|
-| Slider | `slider` | Draft | [22145-141089](https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089) | [slider.html](slider/slider.html) | [slider.md](slider/slider.md) |
+| Slider | `slider` | Draft | [slider.html](https://matt-trice-aptean.github.io/inspire-components/components/slider/slider.html) | [slider.md](slider/slider.md) | [Figma](https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089) |
 
 ---
 
