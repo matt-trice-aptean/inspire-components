@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADK / Slider — Component Draft</title>
+  <style>
+
+    /* ==========================================================
+       SEMANTIC LAYER — Light Mode
+       Maps to Figma variable group: surface, text, border,
+       icon, status, brand
+    ========================================================== */
+    :root {
+      /* Surface */
+      --color-surface-default:        #ffffff;
+      --color-surface-subtle:         #fafafa;
+      --color-surface-hover:          #e7e6e6;
+      --color-surface-disabled:       #f2f2f2;
+      --color-surface-selected:       #fffbe4;
+      --color-surface-selected-alt:   #fff7ca;
+      --color-surface-selected-hover: #fbe67e;
+      --color-surface-highlight:      #fae164;
+      --color-surface-overlay:        #ffffff;
+
+      /* Text */
+      --color-text-default:           #3f3e3d;
+      --color-text-subtle:            #6f6e6d;
+      --color-text-disabled:          #cfcece;  /* updated from Figma: text/disabled */
+      --color-text-placeholder:       #cfcece;
+      --color-text-inverse:           #ffffff;
+      --color-text-on-selected:       #3f3e3d;
+      --color-text-on-highlight:      #3f3e3d;
+      --color-text-link:              #fcd515;
+
+      /* Border */
+      --color-border-subtle:          #fafafa;
+      --color-border-default:         #e7e6e6;
+      --color-border-strong:          #3f3e3d;
+      --color-border-focus:           #878686;
+      --color-border-emphasis:        #575655;
+
+      /* Icon */
+      --color-icon-default:           #878686;
+      --color-icon-subtle:            #cfcece;
+      --color-icon-hover:             #3f3e3d;
+      --color-icon-disabled:          #cfcece;
+      --color-icon-inverse:           #ffffff;
+      --color-icon-on-selected:       #3f3e3d;
+
+      /* Status */
+      --color-status-success:         #8fda34;
+      --color-status-success-surface: #f0fad9;
+      --color-status-warning:         #ffb23f;
+      --color-status-warning-surface: #fff4e0;
+      --color-status-error:           #e53e3e;
+      --color-status-error-surface:   #fef2f2;
+      --color-status-info:            #3b82f6;
+      --color-status-info-surface:    #eff6ff;
+
+      /* Brand */
+      --color-brand-default:          #fcd515;
+      --color-brand-subtle:           #fae164;
+      --color-brand-strong:           #ab900e;
+      --color-brand-hover:            #fbe67e;
+      --color-brand-on-brand:         #3f3e3d;
+    }
+
+    /* ==========================================================
+       SLIDER COMPONENT VARIABLES
+       Exception component — unique visual parts require
+       their own variable layer that maps to the semantic layer.
+       Naming convention: --slider-[element]-[property]-[state]
+       Figma variable path: slider/[element]/[state]
+    ========================================================== */
+    :root {
+      /* Track */
+      --slider-track-bg:              var(--color-text-disabled);   /* slider/track/default  → #cfcece */
+      --slider-track-bg-disabled:     var(--color-border-default);  /* slider/track/disabled → #e7e6e6 */
+      --slider-track-height:          4px;
+      --slider-track-radius:          2px;
+
+      /* Range (filled portion) */
+      --slider-range-bg:              var(--color-text-default);    /* slider/range/default  → #3f3e3d */
+      --slider-range-bg-disabled:     var(--color-text-disabled);   /* slider/range/disabled → #cfcece */
+
+      /* Handle — default: solid dark circle, 4px inner stroke, ADK Base shadow */
+      --slider-handle-size:           16px;
+      --slider-handle-bg:             var(--color-text-default);      /* #3f3e3d */
+      --slider-handle-stroke:         var(--color-surface-default);   /* inner stroke: #ffffff */
+      --slider-handle-stroke-width:   4px;
+      --slider-handle-stroke-width-active: 3px;                      /* narrows on active */
+      --slider-handle-shadow:         0 1px 4px rgba(0, 0, 0, 0.18); /* Elevation/ADK Base */
+
+      /* Handle — hover: ADK 70 / Slider/Handle/Hover */
+      --slider-handle-bg-hover:       var(--color-border-emphasis); /* #575655 */
+
+      /* Handle — focus: ADK 70 fill, 2px blue dashed ring at handle edge */
+      --slider-handle-bg-focus:       var(--color-border-emphasis); /* Slider/Handle/Focus → ADK 70 → #575655 */
+      --slider-handle-ring-focus:     #1a88b7;                      /* Border/Focus → ADK/Inline Link Default → #1a88b7 */
+      --slider-handle-ring-width:     2px;
+      --slider-handle-ring-offset:    0px;                          /* ring sits on edge, not outside */
+
+      /* Handle — active (drag): ADK 70 fill — Slider/Handle/Active */
+      --slider-handle-bg-active:      var(--color-border-emphasis);
+
+      /* Handle — disabled: muted gray, no shadow */
+      --slider-handle-bg-disabled:    var(--color-text-disabled);   /* #cfcece — Slider/Handle/Disabled */
+      --slider-handle-stroke-disabled: var(--color-surface-disabled); /* #f2f2f2 — Slider/Handle Border/Disabled */
+
+      /* Label — font: Inter Tight (GermanedgeSansCn substitute) */
+      --slider-label-text:            var(--color-text-default);    /* updated: text/default */
+      --slider-label-text-disabled:   var(--color-text-disabled);   /* text/disabled → #cfcece */
+      --slider-label-font-size:       12px;
+      --slider-label-line-height:     16px;
+      --slider-label-gap:             0px;                          /* 0px gap between track and labels */
+    }
+
+    /* ==========================================================
+       DARK MODE — TDK
+       Override semantic tokens + component vars for dark theme.
+       Values sourced from Figma COMPONENTS collection, TDK mode.
+    ========================================================== */
+    html[data-theme="dark"] {
+      /* Surface */
+      --color-surface-subtle:           #202026;  /* Surface/Page TDK → TDK 00 */
+      --color-surface-default:          #31313b;  /* Surface/Default TDK → TDK 30 */
+      --color-surface-disabled:         #3c3c44;  /* TDK 40 */
+      --color-surface-hover:            #3c3c44;
+      --color-surface-overlay:          #31313b;
+
+      /* Text */
+      --color-text-default:             #d4d4d5;  /* Text/Default TDK → TDK 80 */
+      --color-text-subtle:              #bcbcbe;  /* TDK 70 */
+      --color-text-disabled:            #50505d;  /* Text/Disabled TDK → TDK 50 */
+      --color-text-placeholder:         #50505d;
+      --color-text-inverse:             #202026;
+
+      /* Border */
+      --color-border-default:           #3c3c44;  /* TDK 40 */
+      --color-border-subtle:            #31313b;  /* TDK 30 */
+      --color-border-strong:            #d4d4d5;  /* TDK 80 */
+      --color-border-focus:             #bcbcbe;  /* TDK 70 */
+      --color-border-emphasis:          #bcbcbe;  /* TDK 70 — Slider/Handle/Hover+Focus+Active */
+
+      /* Icon */
+      --color-icon-default:             #bcbcbe;
+      --color-icon-subtle:              #50505d;
+      --color-icon-hover:               #d4d4d5;
+      --color-icon-disabled:            #50505d;
+
+      /* Slider — component vars that don't cascade via semantic tokens */
+      --slider-handle-bg-disabled:      #31313b;  /* TDK 30 — Slider/Handle/Disabled */
+      --slider-handle-stroke-disabled:  var(--color-text-disabled); /* TDK 50 — Slider/Handle Border/Disabled */
+      --slider-handle-ring-focus:       #7c79ff;  /* Border/Focus → TDK/Inline Link Default → #7c79ff */
+    }
+
+    /* ==========================================================
+       BASE / RESET
+    ========================================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 40px 24px;
+      background: var(--color-surface-subtle);
+      font-family: 'GermanedgeSansCn', Arial, Helvetica, sans-serif;
+      color: var(--color-text-default);
+    }
+
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--color-text-default);
+    }
+
+    .page-subtitle {
+      font-size: 12px;
+      color: var(--color-text-subtle);
+      margin: 0 0 48px;
+    }
+
+    /* State section layout */
+    .state-group {
+      background: var(--color-surface-default);
+      padding: 32px;
+      margin-bottom: 24px;
+      border: 1px solid var(--color-border-default);
+    }
+
+    .state-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-subtle);
+      margin: 0 0 24px;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    /* ==========================================================
+       dx-slider — BASE STRUCTURE
+    ========================================================== */
+    .dx-slider {
+      position: relative;
+      width: 100%;
+      user-select: none;
+    }
+
+    .dx-slider-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--slider-label-gap); /* 0px — labels sit flush against the track container */
+    }
+
+    /* Track container */
+    .dx-trackbar-container {
+      position: relative;
+      height: var(--slider-handle-size);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Track */
+    .dx-slider-track {
+      position: relative;
+      width: 100%;
+      height: var(--slider-track-height);
+      background: var(--slider-track-bg);
+      border-radius: var(--slider-track-radius);
+      overflow: visible;
+    }
+
+    /* Range */
+    .dx-slider-range {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: var(--slider-range-bg);
+      border-radius: var(--slider-track-radius);
+    }
+
+    /* Handle */
+    .dx-slider-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--slider-handle-size);
+      height: var(--slider-handle-size);
+      background: var(--slider-handle-bg);
+      border: none;
+      border-radius: 50%;
+      /* inner stroke + ADK Base drop shadow */
+      box-shadow:
+        inset 0 0 0 var(--slider-handle-stroke-width) var(--slider-handle-stroke),
+        var(--slider-handle-shadow);
+      cursor: pointer;
+      transition: background 0.1s ease;
+      z-index: 1;
+    }
+
+    .dx-slider-handle:hover {
+      background: var(--slider-handle-bg-hover);
+    }
+
+    .dx-slider-handle:focus-visible {
+      background: var(--slider-handle-bg-focus);
+      outline: var(--slider-handle-ring-width) dashed var(--slider-handle-ring-focus);
+      outline-offset: var(--slider-handle-ring-offset);
+    }
+
+    .dx-slider-handle:active {
+      background: var(--slider-handle-bg-active);
+      box-shadow:
+        inset 0 0 0 var(--slider-handle-stroke-width-active) var(--slider-handle-stroke),
+        var(--slider-handle-shadow);
+    }
+
+    /* ==========================================================
+       STATE: With Labels
+    ========================================================== */
+    .dx-slider-label-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0;
+    }
+
+    .dx-slider-label {
+      font-family: 'Inter Tight', 'Inter', Arial, sans-serif;
+      font-size: var(--slider-label-font-size);
+      line-height: var(--slider-label-line-height);
+      color: var(--slider-label-text);
+    }
+
+    /* ==========================================================
+       STATE: Disabled
+    ========================================================== */
+    .dx-state-disabled .dx-slider-track {
+      background: var(--slider-track-bg-disabled);
+    }
+
+    .dx-state-disabled .dx-slider-range {
+      background: var(--slider-range-bg-disabled);
+    }
+
+    .dx-state-disabled .dx-slider-handle {
+      background: var(--slider-handle-bg-disabled);
+      /* inner stroke uses disabled color — differs from default in dark mode */
+      box-shadow: inset 0 0 0 var(--slider-handle-stroke-width) var(--slider-handle-stroke-disabled);
+      cursor: not-allowed;
+    }
+
+    .dx-state-disabled .dx-slider-handle:hover {
+      background: var(--slider-handle-bg-disabled);
+    }
+
+    .dx-state-disabled .dx-slider-label {
+      color: var(--slider-label-text-disabled);
+    }
+
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+    <h1>ADK / Slider</h1>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <a href="https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089&t=sB33hLVdZtXk6cVw-11"
+         target="_blank" rel="noopener"
+         style="
+           display: inline-flex;
+           align-items: center;
+           gap: 6px;
+           font-family: 'Inter Tight', Arial, sans-serif;
+           font-size: 11px;
+           font-weight: 600;
+           text-transform: uppercase;
+           letter-spacing: 0.06em;
+           text-decoration: none;
+           background: none;
+           border: 1px solid var(--color-border-default);
+           color: var(--color-text-subtle);
+           padding: 4px 12px;
+           cursor: pointer;
+         ">
+        <svg width="9" height="14" viewBox="0 0 38 57" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z" fill="#1ABCFE"/>
+          <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 0 1-19 0z" fill="#0ACF83"/>
+          <path d="M19 0h9.5a9.5 9.5 0 0 1 0 19H19V0z" fill="#FF7262"/>
+          <path d="M0 9.5A9.5 9.5 0 0 1 9.5 0H19v19H9.5A9.5 9.5 0 0 1 0 9.5z" fill="#F24E1E"/>
+          <path d="M0 28.5A9.5 9.5 0 0 1 9.5 19H19v19H9.5A9.5 9.5 0 0 1 0 28.5z" fill="#A259FF"/>
+        </svg>
+        Open in Figma
+      </a>
+      <button id="theme-toggle" style="
+        font-family: 'Inter Tight', Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: none;
+        border: 1px solid var(--color-border-default);
+        color: var(--color-text-subtle);
+        padding: 4px 12px;
+        cursor: pointer;
+        border-radius: 0;
+      ">Dark Mode</button>
+    </div>
+  </div>
+  <p class="page-subtitle">Component draft · 4 states · Light + Dark</p>
+
+  <!-- ========================================================
+       STATE 1: Default
+  ========================================================= -->
+  <div class="state-group">
+    <p class="state-label">Default</p>
+    <div class="slider-row">
+      <div class="dx-slider">
+        <div class="dx-slider-wrapper">
+          <div class="dx-trackbar-container">
+            <div class="dx-slider-track">
+              <div class="dx-slider-range" style="width: 50%;"></div>
+              <div class="dx-slider-handle" style="left: 50%;" tabindex="0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STATE 2: Default — With Labels
+  ========================================================= -->
+  <div class="state-group">
+    <p class="state-label">Default — With Labels</p>
+    <div class="slider-row">
+      <div class="dx-slider">
+        <div class="dx-slider-wrapper">
+          <div class="dx-trackbar-container">
+            <div class="dx-slider-track">
+              <div class="dx-slider-range" style="width: 35%;"></div>
+              <div class="dx-slider-handle" style="left: 35%;" tabindex="0"></div>
+            </div>
+          </div>
+          <div class="dx-slider-label-container">
+            <span class="dx-slider-label">0</span>
+            <span class="dx-slider-label">100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STATE 3: Disabled
+  ========================================================= -->
+  <div class="state-group">
+    <p class="state-label">Disabled</p>
+    <div class="slider-row">
+      <div class="dx-slider dx-state-disabled">
+        <div class="dx-slider-wrapper">
+          <div class="dx-trackbar-container">
+            <div class="dx-slider-track">
+              <div class="dx-slider-range" style="width: 50%;"></div>
+              <div class="dx-slider-handle" style="left: 50%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       STATE 4: Disabled — With Labels
+  ========================================================= -->
+  <div class="state-group">
+    <p class="state-label">Disabled — With Labels</p>
+    <div class="slider-row">
+      <div class="dx-slider dx-state-disabled">
+        <div class="dx-slider-wrapper">
+          <div class="dx-trackbar-container">
+            <div class="dx-slider-track">
+              <div class="dx-slider-range" style="width: 50%;"></div>
+              <div class="dx-slider-handle" style="left: 50%;"></div>
+            </div>
+          </div>
+          <div class="dx-slider-label-container">
+            <span class="dx-slider-label">0</span>
+            <span class="dx-slider-label">100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CODE REFERENCE
+  ========================================================= -->
+  <div class="state-group code-reference">
+    <p class="state-label">Code Reference</p>
+
+    <div class="code-tabs">
+      <button class="code-tab active" data-target="tab-html">HTML</button>
+      <button class="code-tab" data-target="tab-css">CSS Variables</button>
+      <button class="code-tab" data-target="tab-vars">Variable Reference</button>
+    </div>
+
+    <!-- HTML Snippet -->
+    <div class="code-panel active" id="tab-html">
+      <pre><code><span class="code-comment">&lt;!-- Default --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider"</span>&gt;
+  &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-wrapper"</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-trackbar-container"</span>&gt;
+      &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-track"</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-range"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-handle"</span> <span class="code-attr">tabindex</span>=<span class="code-string">"0"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+      &lt;/<span class="code-tag">div</span>&gt;
+    &lt;/<span class="code-tag">div</span>&gt;
+  &lt;/<span class="code-tag">div</span>&gt;
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Default — With Labels --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider"</span>&gt;
+  &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-wrapper"</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-trackbar-container"</span>&gt;
+      &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-track"</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-range"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-handle"</span> <span class="code-attr">tabindex</span>=<span class="code-string">"0"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+      &lt;/<span class="code-tag">div</span>&gt;
+    &lt;/<span class="code-tag">div</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label-container"</span>&gt;
+      &lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label"</span>&gt;0&lt;/<span class="code-tag">span</span>&gt;
+      &lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label"</span>&gt;100&lt;/<span class="code-tag">span</span>&gt;
+    &lt;/<span class="code-tag">div</span>&gt;
+  &lt;/<span class="code-tag">div</span>&gt;
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Disabled — add dx-state-disabled to root --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider dx-state-disabled"</span>&gt;
+  &lt;<span class="code-comment">&lt;!-- same inner structure, no tabindex on handle --&gt;</span>
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Disabled — With Labels --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider dx-state-disabled"</span>&gt;
+  &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-wrapper"</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-trackbar-container"</span>&gt;
+      &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-track"</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-range"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+        &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-handle"</span>&gt;&lt;/<span class="code-tag">div</span>&gt;
+      &lt;/<span class="code-tag">div</span>&gt;
+    &lt;/<span class="code-tag">div</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label-container"</span>&gt;
+      &lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label"</span>&gt;0&lt;/<span class="code-tag">span</span>&gt;
+      &lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-label"</span>&gt;100&lt;/<span class="code-tag">span</span>&gt;
+    &lt;/<span class="code-tag">div</span>&gt;
+  &lt;/<span class="code-tag">div</span>&gt;
+&lt;/<span class="code-tag">div</span>&gt;</code></pre>
+    </div>
+
+    <!-- CSS Snippet -->
+    <div class="code-panel" id="tab-css">
+      <pre><code><span class="code-comment">/* Slider component variables — map to semantic layer */</span>
+<span class="code-comment">/* Figma variable path: slider/[element]/[state]      */</span>
+<span class="code-tag">:root</span> {
+  <span class="code-comment">/* Track */</span>
+  <span class="code-attr">--slider-track-bg</span>:              <span class="code-string">var(--color-text-disabled)</span>;   <span class="code-comment">/* → #cfcece */</span>
+  <span class="code-attr">--slider-track-bg-disabled</span>:     <span class="code-string">var(--color-border-default)</span>;  <span class="code-comment">/* → #e7e6e6 */</span>
+  <span class="code-attr">--slider-track-height</span>:          <span class="code-string">4px</span>;
+  <span class="code-attr">--slider-track-radius</span>:          <span class="code-string">2px</span>;
+
+  <span class="code-comment">/* Range */</span>
+  <span class="code-attr">--slider-range-bg</span>:              <span class="code-string">var(--color-text-default)</span>;    <span class="code-comment">/* → #3f3e3d */</span>
+  <span class="code-attr">--slider-range-bg-disabled</span>:     <span class="code-string">var(--color-text-disabled)</span>;   <span class="code-comment">/* → #cfcece */</span>
+
+  <span class="code-comment">/* Handle — 16px solid circle, 4px inner stroke, ADK Base drop shadow */</span>
+  <span class="code-attr">--slider-handle-size</span>:           <span class="code-string">16px</span>;
+  <span class="code-attr">--slider-handle-bg</span>:             <span class="code-string">var(--color-text-default)</span>;      <span class="code-comment">/* → #3f3e3d */</span>
+  <span class="code-attr">--slider-handle-stroke</span>:              <span class="code-string">var(--color-surface-default)</span>;   <span class="code-comment">/* inner: #ffffff */</span>
+  <span class="code-attr">--slider-handle-stroke-width</span>:        <span class="code-string">4px</span>;
+  <span class="code-attr">--slider-handle-stroke-width-active</span>: <span class="code-string">3px</span>;                          <span class="code-comment">/* narrows on active */</span>
+  <span class="code-attr">--slider-handle-shadow</span>:         <span class="code-string">0 1px 4px rgba(0, 0, 0, 0.18)</span>; <span class="code-comment">/* ADK Base */</span>
+
+  <span class="code-comment">/* Handle — hover: ADK 70 / Slider/Handle/Hover */</span>
+  <span class="code-attr">--slider-handle-bg-hover</span>:       <span class="code-string">var(--color-border-emphasis)</span>;    <span class="code-comment">/* → #575655 */</span>
+
+  <span class="code-comment">/* Handle — focus: ADK 70 fill, 2px blue ring at edge */</span>
+  <span class="code-attr">--slider-handle-bg-focus</span>:       <span class="code-string">var(--color-border-emphasis)</span>;    <span class="code-comment">/* Slider/Handle/Focus → ADK 70 → #575655 */</span>
+  <span class="code-attr">--slider-handle-ring-focus</span>:     <span class="code-string">#1a88b7</span>;                          <span class="code-comment">/* Border/Focus (SHARED SEMANTIC) */</span>
+  <span class="code-attr">--slider-handle-ring-width</span>:     <span class="code-string">2px</span>;
+  <span class="code-attr">--slider-handle-ring-offset</span>:    <span class="code-string">0px</span>;                              <span class="code-comment">/* on edge, not outside */</span>
+
+  <span class="code-comment">/* Handle — active: ADK 70 — Slider/Handle/Active */</span>
+  <span class="code-attr">--slider-handle-bg-active</span>:      <span class="code-string">var(--color-border-emphasis)</span>;  <span class="code-comment">/* → #575655 */</span>
+
+  <span class="code-comment">/* Handle — disabled: muted gray, no shadow */</span>
+  <span class="code-attr">--slider-handle-bg-disabled</span>:         <span class="code-string">var(--color-text-disabled)</span>;    <span class="code-comment">/* → #cfcece */</span>
+  <span class="code-attr">--slider-handle-stroke-disabled</span>:     <span class="code-string">var(--color-surface-disabled)</span>; <span class="code-comment">/* → #f2f2f2 */</span>
+
+  <span class="code-comment">/* Label — Inter Tight (GermanedgeSansCn substitute) */</span>
+  <span class="code-attr">--slider-label-text</span>:            <span class="code-string">var(--color-text-default)</span>;    <span class="code-comment">/* → #3f3e3d */</span>
+  <span class="code-attr">--slider-label-text-disabled</span>:   <span class="code-string">var(--color-text-disabled)</span>;   <span class="code-comment">/* → #cfcece */</span>
+  <span class="code-attr">--slider-label-font-size</span>:       <span class="code-string">12px</span>;
+  <span class="code-attr">--slider-label-line-height</span>:     <span class="code-string">16px</span>;
+}
+
+<span class="code-comment">/* Dark mode overrides — TDK */</span>
+<span class="code-tag">html[data-theme="dark"]</span> {
+  <span class="code-comment">/* Semantic tokens that differ in TDK */</span>
+  <span class="code-attr">--color-surface-subtle</span>:       <span class="code-string">#202026</span>;  <span class="code-comment">/* Surface/Page TDK */</span>
+  <span class="code-attr">--color-surface-default</span>:      <span class="code-string">#31313b</span>;  <span class="code-comment">/* Surface/Default TDK */</span>
+  <span class="code-attr">--color-text-default</span>:         <span class="code-string">#d4d4d5</span>;  <span class="code-comment">/* Text/Default TDK */</span>
+  <span class="code-attr">--color-text-disabled</span>:        <span class="code-string">#50505d</span>;  <span class="code-comment">/* Text/Disabled TDK */</span>
+  <span class="code-attr">--color-border-default</span>:       <span class="code-string">#3c3c44</span>;  <span class="code-comment">/* TDK 40 */</span>
+  <span class="code-attr">--color-border-emphasis</span>:      <span class="code-string">#bcbcbe</span>;  <span class="code-comment">/* TDK 70 */</span>
+
+  <span class="code-comment">/* Component vars with no clean semantic cascade */</span>
+  <span class="code-attr">--slider-handle-bg-disabled</span>:         <span class="code-string">#31313b</span>;                        <span class="code-comment">/* TDK 30 */</span>
+  <span class="code-attr">--slider-handle-stroke-disabled</span>:     <span class="code-string">var(--color-text-disabled)</span>;     <span class="code-comment">/* TDK 50 */</span>
+  <span class="code-attr">--slider-handle-ring-focus</span>:          <span class="code-string">#7c79ff</span>;                        <span class="code-comment">/* Border/Focus (SHARED SEMANTIC) */</span>
+}</code></pre>
+    </div>
+
+    <!-- Variable Reference Table -->
+    <div class="code-panel" id="tab-vars">
+      <table class="var-table">
+        <thead>
+          <tr>
+            <th>CSS Variable</th>
+            <th>Figma Variable</th>
+            <th>ADK (Light)</th>
+            <th></th>
+            <th>TDK (Dark)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="var-group-row"><td colspan="6">Track</td></tr>
+          <tr>
+            <td><code>--slider-track-bg</code></td>
+            <td><code>Slider/Track/Default</code></td>
+            <td>#cfcece <span class="alias">ADK 30</span></td>
+            <td><span class="swatch" style="background:#cfcece;"></span></td>
+            <td>#50505d <span class="alias">TDK 50</span></td>
+            <td><span class="swatch" style="background:#50505d;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-track-bg-disabled</code></td>
+            <td><code>Slider/Track/Disabled</code></td>
+            <td>#e7e6e6 <span class="alias">ADK 20</span></td>
+            <td><span class="swatch" style="background:#e7e6e6;"></span></td>
+            <td>#3c3c44 <span class="alias">TDK 40</span></td>
+            <td><span class="swatch" style="background:#3c3c44;"></span></td>
+          </tr>
+          <tr class="var-group-row"><td colspan="6">Range</td></tr>
+          <tr>
+            <td><code>--slider-range-bg</code></td>
+            <td><code>Slider/Range/Default</code></td>
+            <td>#3f3e3d <span class="alias">ADK 80</span></td>
+            <td><span class="swatch" style="background:#3f3e3d;"></span></td>
+            <td>#d4d4d5 <span class="alias">TDK 80</span></td>
+            <td><span class="swatch" style="background:#d4d4d5;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-range-bg-disabled</code></td>
+            <td><code>Slider/Range/Disabled</code></td>
+            <td>#cfcece <span class="alias">ADK 30</span></td>
+            <td><span class="swatch" style="background:#cfcece;"></span></td>
+            <td>#50505d <span class="alias">TDK 50</span></td>
+            <td><span class="swatch" style="background:#50505d;"></span></td>
+          </tr>
+          <tr class="var-group-row"><td colspan="6">Handle</td></tr>
+          <tr>
+            <td><code>--slider-handle-bg</code></td>
+            <td><code>Slider/Handle/Default</code></td>
+            <td>#3f3e3d <span class="alias">ADK 80</span></td>
+            <td><span class="swatch" style="background:#3f3e3d;"></span></td>
+            <td>#d4d4d5 <span class="alias">TDK 80</span></td>
+            <td><span class="swatch" style="background:#d4d4d5;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-stroke</code></td>
+            <td><code>Slider/Handle Border/Default</code></td>
+            <td>#ffffff <span class="alias">White</span></td>
+            <td><span class="swatch" style="background:#ffffff;"></span></td>
+            <td>#31313b <span class="alias">TDK 30</span></td>
+            <td><span class="swatch" style="background:#31313b; border-color:#555;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-bg-hover</code></td>
+            <td><code>Slider/Handle/Hover</code></td>
+            <td>#575655 <span class="alias">ADK 70</span></td>
+            <td><span class="swatch" style="background:#575655;"></span></td>
+            <td>#bcbcbe <span class="alias">TDK 70</span></td>
+            <td><span class="swatch" style="background:#bcbcbe;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-bg-focus</code></td>
+            <td><code>Slider/Handle/Focus</code></td>
+            <td>#575655 <span class="alias">ADK 70</span></td>
+            <td><span class="swatch" style="background:#575655;"></span></td>
+            <td>#bcbcbe <span class="alias">TDK 70</span></td>
+            <td><span class="swatch" style="background:#bcbcbe;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-ring-focus</code></td>
+            <td><code>Border/Focus</code></td>
+            <td>#1a88b7 <span class="alias">ADK Inline Link</span></td>
+            <td><span class="swatch" style="background:#1a88b7;"></span></td>
+            <td>#7c79ff <span class="alias">TDK Inline Link</span></td>
+            <td><span class="swatch" style="background:#7c79ff;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-bg-active</code></td>
+            <td><code>Slider/Handle/Active</code></td>
+            <td>#575655 <span class="alias">ADK 70</span></td>
+            <td><span class="swatch" style="background:#575655;"></span></td>
+            <td>#bcbcbe <span class="alias">TDK 70</span></td>
+            <td><span class="swatch" style="background:#bcbcbe;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-bg-disabled</code></td>
+            <td><code>Slider/Handle/Disabled</code></td>
+            <td>#cfcece <span class="alias">ADK 30</span></td>
+            <td><span class="swatch" style="background:#cfcece;"></span></td>
+            <td>#31313b <span class="alias">TDK 30 †</span></td>
+            <td><span class="swatch" style="background:#31313b; border-color:#555;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-handle-stroke-disabled</code></td>
+            <td><code>Slider/Handle Border/Disabled</code></td>
+            <td>#f2f2f2 <span class="alias">ADK 10</span></td>
+            <td><span class="swatch" style="background:#f2f2f2;"></span></td>
+            <td>#50505d <span class="alias">TDK 50 †</span></td>
+            <td><span class="swatch" style="background:#50505d;"></span></td>
+          </tr>
+          <tr class="var-group-row"><td colspan="6">Label — no component-scoped Figma variable; binds directly to shared semantic</td></tr>
+          <tr>
+            <td><code>--slider-label-text</code></td>
+            <td><code>Text/Default</code></td>
+            <td>#3f3e3d <span class="alias">ADK 80</span></td>
+            <td><span class="swatch" style="background:#3f3e3d;"></span></td>
+            <td>#d4d4d5 <span class="alias">TDK 80</span></td>
+            <td><span class="swatch" style="background:#d4d4d5;"></span></td>
+          </tr>
+          <tr>
+            <td><code>--slider-label-text-disabled</code></td>
+            <td><code>Text/Disabled</code></td>
+            <td>#cfcece <span class="alias">ADK 30</span></td>
+            <td><span class="swatch" style="background:#cfcece;"></span></td>
+            <td>#50505d <span class="alias">TDK 50</span></td>
+            <td><span class="swatch" style="background:#50505d;"></span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px; color:var(--color-text-subtle); margin-top:12px; line-height:1.6;">
+        † TDK value does not cascade from the same semantic token as ADK — overridden directly in <code>html[data-theme="dark"]</code>.
+      </p>
+    </div>
+
+  </div>
+
+</div><!-- /.page-wrap -->
+
+  <style>
+    /* Code reference styles */
+    .code-reference { }
+
+    .code-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--color-border-default);
+      margin-bottom: 0;
+    }
+
+    .code-tab {
+      font-family: 'GermanedgeSansCn', Arial, sans-serif;
+      font-size: 12px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: var(--color-text-subtle);
+      margin-bottom: -1px;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .code-tab:hover { color: var(--color-text-default); }
+
+    .code-tab.active {
+      color: var(--color-text-default);
+      border-bottom-color: var(--color-brand-default);
+      font-weight: 600;
+    }
+
+    .code-panel {
+      display: none;
+      padding-top: 24px;
+    }
+
+    .code-panel.active { display: block; }
+
+    pre {
+      margin: 0;
+      background: #1e1e1e;
+      border-radius: 2px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #d4d4d4;
+    }
+
+    .code-comment { color: #6a9955; }
+    .code-tag     { color: #4ec9b0; }
+    .code-attr    { color: #9cdcfe; }
+    .code-string  { color: #ce9178; }
+
+    /* Variable table */
+    .var-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .var-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-subtle);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--color-border-default);
+    }
+
+    .var-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      color: var(--color-text-default);
+      vertical-align: middle;
+    }
+
+    .var-table code {
+      font-size: 12px;
+      color: var(--color-text-default);
+      background: var(--color-surface-subtle);
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+
+    .var-group-row td {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-subtle);
+      background: var(--color-surface-subtle);
+      padding: 6px 12px;
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 2px;
+      border: 1px solid var(--color-border-default);
+      vertical-align: middle;
+    }
+
+    .alias {
+      font-size: 10px;
+      color: var(--color-text-subtle);
+      font-family: 'Consolas', 'Courier New', monospace;
+      margin-left: 4px;
+    }
+  </style>
+
+  <script>
+    document.querySelectorAll('.code-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const panel = document.getElementById(tab.dataset.target);
+        document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panel.classList.add('active');
+      });
+    });
+  </script>
+
+  <script>
+    function initSlider(slider) {
+      if (slider.classList.contains('dx-state-disabled')) return;
+
+      const track   = slider.querySelector('.dx-slider-track');
+      const range   = slider.querySelector('.dx-slider-range');
+      const handle  = slider.querySelector('.dx-slider-handle');
+      const tooltip = slider.querySelector('.dx-slider-tooltip');
+      const min     = 0;
+      const max     = 100;
+
+      let dragging = false;
+
+      function getPercent(clientX) {
+        const rect = track.getBoundingClientRect();
+        let pct = (clientX - rect.left) / rect.width;
+        return Math.min(1, Math.max(0, pct));
+      }
+
+      function update(pct) {
+        const val = Math.round(pct * (max - min) + min);
+        handle.style.left = (pct * 100) + '%';
+        range.style.width = (pct * 100) + '%';
+        if (tooltip) tooltip.textContent = val;
+      }
+
+      // Mouse drag
+      handle.addEventListener('mousedown', (e) => {
+        dragging = true;
+        handle.classList.add('dx-state-active');
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        update(getPercent(e.clientX));
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        handle.classList.remove('dx-state-active');
+      });
+
+      // Touch drag
+      handle.addEventListener('touchstart', (e) => {
+        dragging = true;
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!dragging) return;
+        update(getPercent(e.touches[0].clientX));
+      });
+
+      document.addEventListener('touchend', () => { dragging = false; });
+
+      // Click on track to jump
+      track.addEventListener('mousedown', (e) => {
+        if (e.target === handle) return;
+        update(getPercent(e.clientX));
+      });
+
+      // Keyboard support
+      handle.addEventListener('keydown', (e) => {
+        const rect  = track.getBoundingClientRect();
+        const curr  = parseFloat(handle.style.left) / 100;
+        const step  = 1 / (max - min);
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp')   update(Math.min(1, curr + step));
+        if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') update(Math.max(0, curr - step));
+        if (e.key === 'Home') update(0);
+        if (e.key === 'End')  update(1);
+      });
+    }
+
+    document.querySelectorAll('.dx-slider').forEach(initSlider);
+  </script>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    toggle.addEventListener('click', () => {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      document.documentElement.dataset.theme = isDark ? 'light' : 'dark';
+      toggle.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    });
+  </script>
+
+</body>
+</html>
