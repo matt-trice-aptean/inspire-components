@@ -7,7 +7,7 @@ source-library: DevExtreme dxSlider
 source-url: https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxSlider/
 figma-file: yck1tcUXgdQ5aYX6iUAwrO
 figma-node: 22145-141089
-figma-page: "ADK / Slider — Draft"
+figma-page: "ADK / Slider"
 figma-collection: COMPONENTS
 prototype: components/slider/slider.html
 spec: components/slider/slider.md
