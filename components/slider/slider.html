@@ -36,6 +36,7 @@
       --color-text-on-selected:       #3f3e3d;
       --color-text-on-highlight:      #3f3e3d;
       --color-text-link:              #fcd515;
+      --color-inline-link:            #1a88b7;   /* ADK Inline Link Default */
 
       /* Border */
       --color-border-subtle:          #fafafa;
@@ -156,6 +157,9 @@
       --color-icon-subtle:              #50505d;
       --color-icon-hover:               #d4d4d5;
       --color-icon-disabled:            #50505d;
+
+      /* Inline link */
+      --color-inline-link:              #7c79ff;   /* TDK Inline Link Default */
 
       /* Slider — component vars that don't cascade via semantic tokens  */
       --slider-handle-bg-disabled:      #31313b;                       /* † TDK 30 — Slider/Handle/Disabled */
@@ -989,9 +993,24 @@
       color: var(--color-text-default);
     }
 
+    .markdown-body a {
+      color: var(--color-inline-link);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .markdown-body a:hover {
+      opacity: 0.8;
+    }
+
     /* Hide YAML frontmatter block */
     .markdown-body .frontmatter {
       display: none;
+    }
+
+    /* Page-level inline links */
+    a {
+      color: var(--color-inline-link);
     }
   </style>
 
