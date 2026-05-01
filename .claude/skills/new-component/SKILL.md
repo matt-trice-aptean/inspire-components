@@ -194,6 +194,32 @@ Load the `figma-use` skill, then:
 
 After Figma frames are created, update `figma-node` in the spec frontmatter with the new node ID.
 
+### Figma naming conventions
+
+There is an intentional split between how layers are named internally and how the final published component is named.
+
+**Internal layers — use library class names.**
+Name Figma layers after the source library's class names. This keeps a direct, traceable link between the Figma structure and the DOM. A developer reading the Figma file can immediately map a layer to the element it represents.
+
+Example from the slider (DevExtreme):
+- Frame layers: `dx-slider`, `dx-slider-wrapper`, `dx-trackbar-container`, `dx-slider-track`, `dx-slider-range`, `dx-slider-handle`, `dx-slider-label`
+
+**Published component name — use Inspire design system naming.**
+The top-level Figma component (the one that gets published to the library and used by designers) should use the Inspire/ADK name, not the library's internal name. The Inspire name is typically shorter, framework-agnostic, and matches what designers will search for.
+
+Example: the DevExtreme `dxSlider` component is published in Figma as `Slider`.
+
+**Why the split matters:**
+- Designers consume the published component name — they don't need to know it's backed by DevExtreme
+- Developers and agents trace layers back to the DOM using library class names
+- If the underlying library ever changes, the published component name stays stable while the internal layer names update to match the new library
+
+**In practice — when building Figma frames:**
+1. Name all sublayers using library class names (e.g. `dx-slider-handle`)
+2. Name the top-level component frame using the Inspire name (e.g. `Slider`)
+3. Add a note in the Figma frame description: `Source: DevExtreme dxSlider` (or whichever library)
+4. Document any name divergences in the spec's Open Questions if the final Inspire name hasn't been confirmed by design
+
 ---
 
 ## 9. Wrap up
