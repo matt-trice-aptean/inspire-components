@@ -488,14 +488,14 @@
     <p class="state-label">Code Reference</p>
 
     <div class="code-tabs">
-      <button class="code-tab active" data-target="tab-html">HTML</button>
+      <button class="code-tab active" id="tab-spec-btn" data-target="tab-spec">spec.md</button>
+      <button class="code-tab" data-target="tab-html">HTML</button>
       <button class="code-tab" data-target="tab-css">CSS Variables</button>
       <button class="code-tab" data-target="tab-vars">Variable Reference</button>
-      <button class="code-tab" data-target="tab-spec">Spec</button>
     </div>
 
     <!-- HTML Snippet -->
-    <div class="code-panel active" id="tab-html">
+    <div class="code-panel" id="tab-html">
       <pre><code><span class="code-comment">&lt;!-- Default --&gt;</span>
 &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider"</span>&gt;
   &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-string">"dx-slider-wrapper"</span>&gt;
@@ -724,8 +724,8 @@
       </p>
     </div>
 
-    <!-- Spec tab -->
-    <div class="code-panel" id="tab-spec">
+    <!-- Spec tab (default active) -->
+    <div class="code-panel active" id="tab-spec">
       <div class="markdown-body" id="spec-rendered"></div>
     </div>
 
@@ -1337,8 +1337,16 @@ Verify against `components/slider/slider.html`. Toggle dark mode with the button
 
   <script>
     // Render embedded markdown spec into the Spec tab
-    // Strip YAML frontmatter (content between opening and closing ---)
     const raw = document.getElementById('spec-source').textContent;
+
+    // Parse component name from YAML frontmatter, capitalize first letter
+    const nameMatch = raw.match(/^component:\s*(.+)$/m);
+    const componentName = nameMatch
+      ? nameMatch[1].trim().charAt(0).toUpperCase() + nameMatch[1].trim().slice(1)
+      : 'Component';
+    document.getElementById('tab-spec-btn').textContent = componentName + '-spec.md';
+
+    // Strip frontmatter and render
     const stripped = raw.replace(/^---[\s\S]*?---\n/, '');
     marked.setOptions({ gfm: true, breaks: false });
     document.getElementById('spec-rendered').innerHTML = marked.parse(stripped);
