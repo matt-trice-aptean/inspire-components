@@ -727,6 +727,15 @@
     <!-- Spec tab (default active) -->
     <div class="code-panel active" id="tab-spec">
       <div class="markdown-body" id="spec-rendered"></div>
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border-default);">
+        <a id="spec-download-link" href="slider.md" download
+           style="font-family: 'Inter Tight', Arial, sans-serif; font-size: 12px; color: var(--color-text-subtle); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+          </svg>
+          <span id="spec-download-label">Download spec.md</span>
+        </a>
+      </div>
     </div>
 
   </div>
@@ -1339,12 +1348,18 @@ Verify against `components/slider/slider.html`. Toggle dark mode with the button
     // Render embedded markdown spec into the Spec tab
     const raw = document.getElementById('spec-source').textContent;
 
-    // Parse component name from YAML frontmatter, capitalize first letter
+    // Parse component name and id from YAML frontmatter, capitalize first letter
     const nameMatch = raw.match(/^component:\s*(.+)$/m);
+    const idMatch   = raw.match(/^id:\s*(.+)$/m);
     const componentName = nameMatch
       ? nameMatch[1].trim().charAt(0).toUpperCase() + nameMatch[1].trim().slice(1)
       : 'Component';
+    const componentId = idMatch ? idMatch[1].trim() : 'component';
+
+    // Set tab label and download link
     document.getElementById('tab-spec-btn').textContent = componentName + '-spec.md';
+    document.getElementById('spec-download-link').setAttribute('download', componentId + '-spec.md');
+    document.getElementById('spec-download-label').textContent = 'Download ' + componentId + '-spec.md';
 
     // Strip frontmatter and render
     const stripped = raw.replace(/^---[\s\S]*?---\n/, '');

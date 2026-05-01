@@ -154,12 +154,19 @@ body → background: var(--color-surface-subtle); padding: 40px 24px
   .page-wrap → max-width: 860px; margin: 0 auto
     page header → component name, subtitle, Figma link button (if URL available), theme toggle
     .state-group (one per state) → .state-label + component demo
-    code reference section → three tabs: HTML | CSS Variables | Variable Reference
+    code reference section → four tabs: [Name]-spec.md | HTML | CSS Variables | Variable Reference
 ```
 
-### Code reference — Variable Reference tab
+### Code reference tabs
 
-Table with 6 columns: `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`. One row group per visual element.
+**Tab order:** Spec tab is first and the default active tab on page load.
+
+- **[Name]-spec.md** — the full embedded spec rendered as markdown via marked.js. Tab label and download filename are set dynamically from the `component` and `id` fields in the YAML frontmatter. Includes a "Download [id]-spec.md" link at the bottom of the tab that triggers a file download of `[id].md` from the same directory.
+- **HTML** — syntax-highlighted markup for each state variant
+- **CSS Variables** — all component variables with semantic token mappings and dark mode overrides
+- **Variable Reference** — table with 6 columns: `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`. One row group per visual element.
+
+The spec tab serves every audience from a single shared URL — designers validate states, developers implement from the HTML and CSS tabs, agents consume the structured spec. No tab is hidden; the team uses what they need.
 
 ### Theme toggle
 
