@@ -1,266 +1,204 @@
 ---
 name: new-component
-description: Build a new ADK/TDK design system component. Minimum input is a component name and a source library URL (DevExtreme or other). Produces a self-contained HTML/CSS prototype and an audience-aware markdown spec. Optionally creates Figma frames.
-when_to_use: When a designer, product person, or developer wants to document and prototype a new component for the Edge One (ADK/TDK) design system.
+description: Build a new ADK/TDK design system component. Minimum input is a component name and a source library URL (DevExtreme or other). Produces a self-contained HTML prototype and a machine-authoritative markdown spec. Optionally creates Figma frames.
+when_to_use: When a designer, product person, or developer wants to add a new component to the Edge One (ADK/TDK) design system.
 ---
 
 # ADK — New Component Skill
 
-Runs the full ADK new-component workflow for Edge One / Germanedge. Produces a living HTML/CSS prototype and a structured markdown spec, following the patterns established by the ADK Slider component.
+Runs the full new-component workflow for Edge One / Germanedge. Produces a visual HTML prototype and a machine-authoritative spec that serves as the contract between code and Figma.
 
-**Reference examples — read these at the start of every run:**
-- `output/slider.html` — canonical prototype output
-- `output/slider-spec.md` — canonical spec output
+**Architecture:** The codebase is the source of truth. The spec is the contract. Figma is a visualization derived from it. Agents build in both directions from the spec — never from Figma.
+
+**Reference implementation:** `components/slider/` — the slider is the canonical example of this format. Read `components/slider/slider.md` to understand the expected spec structure before building a new one.
 
 ---
 
 ## 1. Gather Inputs
 
-Ask for the following. Only 1 and 2 are required; infer or ask for the rest.
-
 | # | Input | Required | Notes |
 |---|---|---|---|
-| 1 | **Component name** | Yes | Used for file names and CSS variable prefix. E.g. `Checkbox`, `DatePicker`, `Accordion` |
+| 1 | **Component name** | Yes | Used for directory name, file names, CSS variable prefix. E.g. `Checkbox`, `DatePicker` |
 | 2 | **Library URL** | Yes | DevExtreme docs page or other source. Used to research HTML class names and state classes. |
-| 3 | **States** | Infer | If not provided, derive from library docs and present to user for confirmation before proceeding. |
-| 4 | **Figma URL** | Optional | Existing Figma node to reference for variable values. If provided, use Figma MCP to extract variable bindings. |
-| 5 | **Create Figma frames?** | Opt-in | Ask explicitly. If yes, use the `figma-use` skill after the HTML and spec are complete. |
+| 3 | **States** | Infer | Derive from library docs and present to user for confirmation before building. |
+| 4 | **Figma URL** | Optional | Existing Figma node to reference for variable values. If provided, use Figma MCP to extract bindings. |
+| 5 | **Create Figma frames?** | Opt-in | Ask explicitly. If yes, use the `figma-use` skill after spec and prototype are complete. |
 
 ---
 
 ## 2. Research the Component
 
-Fetch the library URL. Extract and document:
+Fetch the library URL. Extract:
 
-- Required HTML class names — these are fixed; the library's CSS targets them
+- Required HTML class names — fixed; the library's CSS targets them. Never invent class names.
 - Runtime state classes (e.g. `.dx-state-hover`, `.dx-state-focused`, `.dx-state-active`, `.dx-state-disabled`)
 - JavaScript required for interaction (drag, keyboard, touch)
-- Default DOM hierarchy (wrapper → container → interactive element)
-
-**Rule:** Never invent class names. Only use what the library documentation specifies.
+- Default DOM hierarchy
 
 ---
 
-## 3. Infer and Confirm States
+## 3. Confirm States
 
-Present the inferred state list to the user before proceeding. Typical pattern:
+Present the inferred state list to the user before building. For each state, identify:
+- `id` — kebab-case key
+- `label` — display name  
+- `css-trigger` — how the state is activated
+- `figma-variant` — Figma component variant property=value
 
-- Default
-- Default — With [Variant] (e.g. labels, icon, placeholder)
-- Hover
-- Focus
-- Active
-- Disabled
-- Disabled — With [Variant]
-- Error (if applicable)
-
-Note any states that are explicitly out of scope (e.g. tooltip variant, range variant) — these go in the spec's Open Questions.
+Note out-of-scope variants explicitly — these go in the spec's Open Questions.
 
 ---
 
 ## 4. Plan the Variable Layer
 
-For each visual property, decide which tier applies. Ask: *could an existing semantic token cover this visual role?* If yes, use it. If no clean match exists, use a component-scoped variable.
+For each visual property, assign a tier:
 
-### Tier 1 — Semantic Tokens (default)
+**Tier 1 — Shared semantic tokens (default).** Use when the role maps cleanly to: `--color-surface-*`, `--color-text-*`, `--color-border-*`, `--color-icon-*`, `--color-brand-*`, `--color-status-*`.
 
-| Group | Variables |
-|---|---|
-| Surface | `--color-surface-default/subtle/hover/disabled/selected` |
-| Text | `--color-text-default/subtle/disabled/inverse/placeholder` |
-| Border | `--color-border-default/subtle/strong/emphasis/focus` |
-| Icon | `--color-icon-default/subtle/hover/disabled/inverse` |
-| Brand | `--color-brand-default/subtle/strong/hover` |
-| Status | `--color-status-success/warning/error/info` + `-surface` |
-
-### Tier 2 — Component-Scoped Variables (exception only)
-
-Use when the component has unique visual parts with no semantic equivalent (e.g. a track fill, a handle circle, a filled range).
-
-Naming convention: `--[component]-[element]-[property]-[state]`
-Example: `--slider-track-bg`, `--slider-handle-stroke-disabled`
+**Tier 2 — Component-scoped variables (exception only).** Use when the component has unique visual roles with no semantic equivalent (e.g. a filled track, a circular handle, an inner stroke). Naming: `--[component]-[element]-[property]-[state]`.
 
 **Rules:**
-- Component variables must reference semantic tokens in `:root` — never raw hex values in the base block
-- Raw hex is only permitted in `html[data-theme="dark"]` for values that deviate from the semantic cascade — annotate these `†`
-- Document every component variable in the spec
+- Component vars in `:root` must reference semantic tokens — never raw hex.
+- Raw hex only in `html[data-theme="dark"]` for values that cannot cascade from the semantic layer. Annotate these `†`.
 
 ---
 
-## 5. Build the HTML Prototype
+## 5. Build the Spec
 
-Create `output/[component-name].html` as a single self-contained file. Read `output/slider.html` to calibrate the exact expected structure, then produce an equivalent for the new component.
+Create `components/[id]/[id].md`. Read `components/slider/slider.md` as the reference format.
 
-### CSS Layers (in order)
+### Required sections (in order)
 
-**Layer 1 — Semantic tokens, light mode:**
-```css
-:root {
-  /* Surface */
-  --color-surface-default:        #ffffff;
-  --color-surface-subtle:         #fafafa;
-  --color-surface-hover:          #e7e6e6;
-  --color-surface-disabled:       #f2f2f2;   /* ADK 10 */
-  --color-surface-selected:       #fffbe4;
-  --color-surface-overlay:        #ffffff;
-
-  /* Text */
-  --color-text-default:           #3f3e3d;   /* ADK 80 */
-  --color-text-subtle:            #6f6e6d;
-  --color-text-disabled:          #cfcece;   /* ADK 30 */
-  --color-text-placeholder:       #cfcece;
-  --color-text-inverse:           #ffffff;
-
-  /* Border */
-  --color-border-default:         #e7e6e6;   /* ADK 20 */
-  --color-border-subtle:          #fafafa;
-  --color-border-strong:          #3f3e3d;   /* ADK 80 */
-  --color-border-emphasis:        #575655;   /* ADK 70 */
-  --color-border-focus:           #878686;   /* ADK 60 */
-
-  /* Icon */
-  --color-icon-default:           #878686;
-  --color-icon-subtle:            #cfcece;
-  --color-icon-hover:             #3f3e3d;
-  --color-icon-disabled:          #cfcece;
-  --color-icon-inverse:           #ffffff;
-
-  /* Status */
-  --color-status-success:         #8fda34;
-  --color-status-success-surface: #f0fad9;
-  --color-status-warning:         #ffb23f;
-  --color-status-warning-surface: #fff4e0;
-  --color-status-error:           #e53e3e;
-  --color-status-error-surface:   #fef2f2;
-  --color-status-info:            #3b82f6;
-  --color-status-info-surface:    #eff6ff;
-
-  /* Brand */
-  --color-brand-default:          #fcd515;
-  --color-brand-subtle:           #fae164;
-  --color-brand-strong:           #ab900e;
-  --color-brand-hover:            #fbe67e;
-}
+**Frontmatter (YAML):**
+```yaml
+---
+component: [Name]
+id: [id]
+version: 0.1.0
+status: draft
+source-library: [Library name]
+source-url: [URL]
+figma-file: [fileKey or "TBD"]
+figma-node: [nodeId or "TBD"]
+figma-page: "[Page name]"
+figma-collection: COMPONENTS
+prototype: components/[id]/[id].html
+spec: components/[id]/[id].md
+modes:
+  light: ADK
+  dark: TDK
+last-updated: [YYYY-MM-DD]
+---
 ```
 
-**Layer 2 — Component variables (if Tier 2 applies):**
-```css
-:root {
-  --[component]-[element]-[property]: var(--color-...);
-}
-```
+**1. Who reads what** — compact table: Section × Audience (Designer / Front End / Product / Agent)
 
-**Layer 3 — Dark mode overrides:**
-```css
-html[data-theme="dark"] {
-  --color-surface-subtle:    #202026;   /* TDK 20 */
-  --color-surface-default:   #31313b;   /* TDK 30 */
-  --color-surface-disabled:  #3c3c44;   /* TDK 40 */
-  --color-surface-hover:     #3c3c44;
-  --color-surface-overlay:   #31313b;
-  --color-text-default:      #d4d4d5;   /* TDK 80 */
-  --color-text-subtle:       #bcbcbe;   /* TDK 70 */
-  --color-text-disabled:     #50505d;   /* TDK 50 */
-  --color-text-placeholder:  #50505d;
-  --color-text-inverse:      #202026;
-  --color-border-default:    #3c3c44;   /* TDK 40 */
-  --color-border-emphasis:   #bcbcbe;   /* TDK 70 */
-  /* Add component overrides for vars that don't cascade correctly — mark † */
-}
-```
+**2. States** — table: `id | Label | CSS Trigger | Figma Variant | Notes`. Plus explicit out-of-scope list.
 
-### Germanedge Styling Rules
+**3. Color Tokens** — grouped by visual element (e.g. Track, Handle, Label). Each group is a table:
 
-- **Font:** `Inter Tight` for condensed (substitute for GermanedgeSansCn); `Inter` for body text (substitute for GermanedgeSans). Load both from Google Fonts.
-- **Border radius:** `0` — square corners per `$border-radius: 0`
-- **Focus rings:** `outline: 2px dashed var(--color-border-focus); outline-offset: 0px` — at the element edge. For interactive components with a dedicated focus color (e.g. inline link blue), use a component-scoped variable.
-- **Shadows:** `box-shadow` only — not background changes for elevation
-- **Spacing:** All sub-element gaps, margins, and padding must be explicit CSS variables. Zero-gap relationships must be set to `0px` explicitly — never omitted.
+| CSS Variable | Selector → Property | Figma Variable | Collection | ADK Light | TDK Dark | Dark Mode |
+|---|---|---|---|---|---|---|
+
+- `Selector → Property` format: `.dx-element-name → css-property`
+- ADK/TDK values: `#hexvalue · PrimitiveAlias` (e.g. `#cfcece · ADK 30`)
+- Dark Mode column: `cascades via --semantic-token-name` OR `explicit: #value †`
+- Figma Variable: exact path in the Figma collection (e.g. `Slider/Track/Default`). Never use CSS variable names here. If unknown, write `Unknown — requires Figma inspection`.
+- Collection: `COMPONENTS` or `SHARED SEMANTIC`
+
+**4. Dimension Tokens** — table: `CSS Variable | Selector → Property | Value | Notes`. No Figma columns (dimensions are not Figma variables).
+
+**5. HTML Structure** — code blocks for each structural variant. Table of DevExtreme runtime state classes.
+
+**6. Variable Architecture** — one paragraph explaining the Tier 1/2 decision for this component and the rules that follow from it.
+
+**7. Acceptance Criteria** — three subsections:
+- Visual (Designer · Agent): per-state checklist for light and dark
+- Functional (Front End · Agent): interaction and spacing checklist
+- Figma Binding (Designer · Agent): variable binding completeness checklist
+
+**8. Open Questions** — table: `# | Question | Owner | Status`
+
+### Spec accuracy rules
+
+- Never fabricate Figma variable names. If unknown, write `Unknown — requires Figma inspection`.
+- Never use CSS variable names in the Figma Variable column. `--color-text-disabled` is a CSS implementation detail, not a Figma variable path.
+- Primitive alias (e.g. `ADK 30`) is the PRIMITIVES entry the variable resolves to — only include if confirmed.
+- Dark mode deviations are `†` with explicit values in the Dark Mode column.
+
+---
+
+## 6. Build the HTML Prototype
+
+Create `components/[id]/[id].html`. Read `components/slider/slider.html` to calibrate the structure, then produce an equivalent for the new component.
+
+### CSS structure (in order)
+
+1. **Semantic tokens, light mode** — full `:root` block (copy from slider.html, do not omit any tokens)
+2. **Component variables** — `:root` block with `--[component]-*` vars referencing semantic tokens
+3. **Dark mode overrides** — `html[data-theme="dark"]` block: semantic overrides + component explicit overrides (annotated `†`)
+4. **Component CSS** — base structure, then one block per state
+
+### Germanedge styling rules
+
+- **Font:** `Inter Tight` for condensed / headings; `Inter` for body. Load from Google Fonts.
+- **Border radius:** `0` — square corners everywhere. Exception: slider track uses `2px` (documented).
+- **Focus rings:** `outline: 2px dashed [focus-color]; outline-offset: 0px` — at the element edge.
 - **Disabled:** `pointer-events: none; cursor: not-allowed;`
+- **Spacing:** all gaps must be explicit CSS variables set to a value, never omitted.
 
-### Page Layout
+### Page layout
 
 ```
 body → background: var(--color-surface-subtle); padding: 40px 24px
   .page-wrap → max-width: 860px; margin: 0 auto
-    .page-header → component title, subtitle, theme toggle button, optional Figma link
+    page header → component name, subtitle, Figma link button (if URL available), theme toggle
     .state-group (one per state) → .state-label + component demo
-    .code-reference → three tabs: HTML | CSS Variables | Variable Reference
+    code reference section → three tabs: HTML | CSS Variables | Variable Reference
 ```
 
-### Code Reference Section
+### Code reference — Variable Reference tab
 
-Three tabs:
-- **HTML** — syntax-highlighted snippet for each state variant
-- **CSS Variables** — all component variables with semantic token mappings
-- **Variable Reference** — table with 6 columns:
+Table with 6 columns: `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`. One row group per visual element.
 
-  `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`
+### Theme toggle
 
-  - Value cells: `#cfcece <span class="alias">ADK 30</span>`
-  - Swatches: 12×12px inline-block colored div
-  - Figma Variable column: use collection prefix (`Slider/Track/Default`) or note shared semantic (`Text/Default (SHARED SEMANTIC)`)
-  - TDK values that deviate from cascade: annotate `†`, explain in footnote below the table
+Button in page header that toggles `data-theme="dark"` on `<html>`. Label switches between "Dark Mode" and "Light Mode".
 
-### Theme Toggle
+### Figma link button
 
-Include a button in the page header that toggles `data-theme="dark"` on `<html>`. Label switches between "Dark Mode" and "Light Mode".
-
-### Figma Link Button (if Figma URL was provided)
-
-Include the official Figma mark (5-shape SVG) as a link button next to the theme toggle, linking to the Figma URL. See `output/slider.html` for the exact SVG markup.
+Include only if a Figma URL was provided. Use the 5-shape Figma SVG mark (see `components/slider/slider.html` for the exact SVG).
 
 ---
 
-## 6. Build the Spec
+## 7. Update the Registry
 
-Create `output/[component-name]-spec.md`. Read `output/slider-spec.md` to calibrate the structure, then produce an equivalent for the new component.
+After both files are created, add a row to `components/README.md`:
 
-### Required Sections (in order)
-
-1. **Header block** — status (Draft), modes (Light + Dark), source library, HTML prototype path, Figma URL (if available)
-2. **Reading Guide** — matrix: Section × Audience (Designer / Front End / Product / AI Agent)
-3. **States** — table: State | Description. Note out-of-scope variants.
-4. **Design Acceptance Criteria** — checkbox lists for light mode and dark mode, plus Typography
-5. **HTML Structure** — code blocks for each structural variant, list of runtime state classes
-6. **Variable Rationale** — explain Tier 1 vs Tier 2 decision for this component
-7. **Component Variables** — tables per visual group (Track, Range, Handle, Label, etc.): `CSS Variable | Figma Variable | ADK (Light) | TDK (Dark)`. Include primitive alias inline: `#cfcece · ADK 30`
-8. **Functional Acceptance Criteria** — interaction checklist (mouse, touch, keyboard, disabled) + spacing verification
-9. **Variable Alignment Checklist** — designer checklist for Figma binding completeness
-10. **Open Questions** — unresolved items for product/design/dev
-
-### Spec Accuracy Rules
-
-- **Never fabricate Figma variable names.** If unknown, write `Unknown — requires Figma inspection`.
-- **Never list CSS semantic token names as Figma variables.** `--color-text-disabled` is a CSS implementation choice, not a Figma declaration. The Figma Variable column holds the Figma collection path only.
-- **Primitive alias** (e.g. `ADK 30`) is the PRIMITIVES entry the variable resolves to — only include if confirmed via Plugin API or Figma inspection.
-- **Dark mode deviations** are marked `†` with a footnote explaining why the value doesn't cascade from the semantic token.
-- **No fabricated semantic token names** in the Variable Rationale — only reference tokens that exist in the semantic layer.
+```md
+| [Name] | `[id]` | Draft | [figma-node](figma-url) | [id].html](id/id.html) | [id.md](id/id.md) |
+```
 
 ---
 
-## 7. Figma Frame Creation (opt-in)
+## 8. Figma Frame Creation (opt-in)
 
-Only run this step if the user confirmed Figma creation at the start.
+Only run if the user confirmed Figma creation at the start.
 
-Load the `figma-use` skill. Then:
+Load the `figma-use` skill, then:
+1. Switch to or create the Figma page specified in the spec frontmatter
+2. Build one auto-layout frame per state
+3. Bind fills to Figma variables (COMPONENTS collection, ADK mode)
+4. Add a header frame: component name, DRAFT badge, LIGHT MODE badge, state count
+5. Screenshot and present for review
 
-1. Switch to or create a Figma page named `ADK / [ComponentName] — Draft`
-2. Build one auto-layout card per state, matching the HTML layout
-3. Apply fill colors using the correct Figma variable bindings (COMPONENTS or SHARED SEMANTIC collection)
-4. Add a header frame: component name, subtitle, DRAFT tag, LIGHT MODE tag, state count
-5. Font: Inter Tight (condensed), Inter (body)
-6. After building, take a screenshot and present it for review
-
-**Note:** Variable bindings require that the Figma file has the COMPONENTS, SHARED SEMANTIC, and PRIMITIVES collections. If running against a different Figma file, check for these collections first.
+After Figma frames are created, update `figma-node` in the spec frontmatter with the new node ID.
 
 ---
 
-## 8. After Both Files Are Complete
+## 9. Wrap up
 
-- Confirm output file paths with the user
-- Ask if they want to push to the GitHub repo
-- Ask if they want to create Figma frames (if not already done)
-- Note any Figma variable names that were left as `Unknown — requires Figma inspection` — these are designer action items
-
-Do not modify `output/new-component-workflow.md` unless the workflow process itself has changed based on something new discovered during this run.
+- Confirm output paths: `components/[id]/[id].html` and `components/[id]/[id].md`
+- Note any `Unknown — requires Figma inspection` entries — these are designer action items
+- Ask if they want to push to the repo
+- Ask if Figma frames are needed (if not already done)
