@@ -22,8 +22,6 @@ last-updated: 2026-05-01
 **Status:** Draft · **Modes:** ADK (Light) + TDK (Dark) · **Library:** DevExtreme dxSlider  
 **Prototype:** `components/slider/slider.html` · **Figma:** [ADK / Slider — Draft](https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089)
 
-> **Architecture:** The codebase is the source of truth. This spec is the contract. Figma is a visualization derived from it. Changes flow: spec → code + Figma (via agent). Never edit Figma token values by hand.
-
 ---
 
 ## Who reads what

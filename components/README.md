@@ -2,7 +2,7 @@
 
 Each component lives in its own subdirectory: `components/[id]/`.
 
-**Architecture:** The codebase is the source of truth. The spec (`.md`) is the contract. The HTML prototype is a visual reference. Figma is a visualization derived from the spec — it is never edited directly for token values.
+**Architecture:** The spec (`.md`) is the contract. The HTML prototype is a visual reference. Figma reflects the spec as the variable ecosystem is established and standardized.
 
 **Files per component:**
 - `[id].html` — self-contained visual prototype with theme toggle

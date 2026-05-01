@@ -8,7 +8,7 @@ when_to_use: When a designer, product person, or developer wants to add a new co
 
 Runs the full new-component workflow for Edge One / Germanedge. Produces a visual HTML prototype and a machine-authoritative spec that serves as the contract between code and Figma.
 
-**Architecture:** The codebase is the source of truth. The spec is the contract. Figma is a visualization derived from it. Agents build in both directions from the spec — never from Figma.
+**Architecture:** The spec is the contract. Figma reflects the spec as the variable ecosystem is established and standardized. Agents build from the spec in both directions — toward code and toward Figma.
 
 **Reference implementation:** `components/slider/` — the slider is the canonical example of this format. Read `components/slider/slider.md` to understand the expected spec structure before building a new one.
 
