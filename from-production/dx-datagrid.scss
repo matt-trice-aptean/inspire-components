@@ -1,0 +1,537 @@
+@use '../theme-variables' as variables;
+
+$cell-text-color: variables.$tokyo-80;
+$cell-bg-color: variables.$tokyo-00;
+$cell-bgcolor-hover: variables.$tokyo-30;
+$cell-text-color-hover: variables.$white;
+$cell-disabled-bgcolor: variables.$tokyo-00;
+$cell-disabled-text-color: variables.$tokyo-40;
+$cell-disabled-checkbox-bgcolor: variables.$tokyo-70;
+$cell-alt-bgcolor: variables.$tokyo-20;
+$cell-alt-border-color: variables.$tokyo-30;
+$cell-alt-bgcolor-hover: variables.$tokyo-00;
+$cell-alt-text-color-hover: variables.$white;
+$cell-alt-disabled-bgcolor: variables.$tokyo-20;
+$cell-alt-disabled-text-color: variables.$tokyo-40;
+$header-cell-text-color: variables.$white;
+$header-cell-border-color: variables.$tokyo-20;
+$checkbox-checked-bgcolor: variables.$brand-100;
+$checkbox-bgcolor: variables.$white;
+$cell-editor-border-color: variables.$tokyo-80;
+$cell-editor-selected-cell-border-color: variables.$tokyo-20;
+$cell-editor-selected-cell-text-color: variables.$tokyo-00;
+$cell-editor-selected-cell-bgcolor: variables.$brand-40;
+$cell-editor-selected-cell-checkbox-bgcolor: variables.$tokyo-00;
+$cell-editor-selected-alt-cell-bgcolor: variables.$brand-60;
+$selected-cell-bgcolor: variables.$brand-60;
+$selected-cell-text-color: variables.$tokyo-30;
+$selected-cell-checkbox-color: variables.$tokyo-00;
+$selected-cell-bgcolor-hover: variables.$brand-40;
+$selected-cell-text-color-hover: variables.$tokyo-00;
+$selected-cell-alt-bgcolor: variables.$brand-100;
+$selected-cell-alt-text-color: variables.$tokyo-30;
+$selected-cell-alt-bgcolor-hover: variables.$brand-60;
+$selected-cell-alt-text-color-hover: variables.$tokyo-00;
+$cell-action-icon-color: variables.$tokyo-60;
+$cell-action-icon-color-hover: variables.$white;
+$cell-selected-action-icon-color: variables.$tokyo-30;
+$cell-selected-action-icon-color-hover: variables.$tokyo-00;
+$cell-focus-color: variables.$tokyo-50;
+
+@mixin dx-data-grid-styles {
+  .dx-datagrid {
+    background-color: $cell-alt-bgcolor;
+
+    .dx-header-row {
+      filter: drop-shadow(0 1px 8px rgb(15 14 13 / 0.18));
+    }
+
+    .dx-datagrid-headers {
+      background-color: $cell-alt-bgcolor;
+      border-left-color: $cell-alt-bgcolor;
+      border-right-color: $cell-alt-bgcolor;
+      border-bottom: none;
+
+      .dx-datagrid-content {
+        .dx-datagrid-table {
+          .dx-header-row {
+            > td {
+              color: $header-cell-text-color;
+              font-weight: 400;
+              font-family: GermanedgeSansCn, Arial, Helvetica, sans-serif;
+              font-size: 14px;
+              border-color: $header-cell-border-color !important;
+            }
+
+            .dx-checkbox-icon {
+              color: $checkbox-bgcolor;
+            }
+
+            .dx-checkbox-checked {
+              .dx-checkbox-icon {
+                color: $checkbox-checked-bgcolor;
+              }
+            }
+
+            .dx-checkbox-indeterminate {
+              .dx-checkbox-icon {
+                color: $checkbox-checked-bgcolor;
+              }
+            }
+          }
+
+          .dx-datagrid-filter-row {
+            td {
+              box-shadow: 0 1px 0 $cell-alt-border-color inset;
+              border-color: $cell-alt-border-color !important;
+              border-top: 1px solid $cell-alt-border-color;
+            }
+
+            .dx-editor-container {
+              .dx-datebox-date {
+                &.dx-state-focused {
+                  .dx-texteditor-container {
+                    border: 1px dashed $cell-focus-color;
+                  }
+                }
+
+                &:not(.dx-dropdowneditor-active) {
+                  .dx-dropdowneditor-button {
+                    &:hover {
+                      .dx-dropdowneditor-icon {
+                        &::before {
+                          color: $cell-text-color-hover;
+                        }
+                      }
+                    }
+                  }
+                }
+
+                .dx-dropdowneditor-icon {
+                  &::before {
+                    color: $cell-text-color;
+                  }
+                }
+              }
+            }
+          }
+
+          .dx-state-hover {
+            td:hover {
+              background-color: $cell-alt-bgcolor-hover;
+            }
+          }
+
+          td:focus-visible {
+            position: relative;
+            outline: none;
+            overflow: visible;
+
+            &::before {
+              pointer-events: none;
+              display: block;
+              position: absolute;
+              content: '';
+              inset: 0;
+              border: 1px dashed variables.$tokyo-90;
+            }
+          }
+        }
+      }
+    }
+
+    .dx-datagrid-content {
+      .dx-datagrid-focus-overlay {
+        border-bottom: 1px solid $cell-editor-border-color;
+      }
+
+      .dx-datagrid-table {
+        .dx-data-row {
+          td {
+            border-left: 0;
+          }
+        }
+
+        .dx-data-row.dx-row > td,
+        .dx-data-row.dx-row > tr > td {
+          background-color: $cell-bg-color;
+        }
+
+        .dx-data-row.dx-row-alt > td,
+        .dx-data-row.dx-row-alt > tr > td {
+          background-color: $cell-alt-bgcolor;
+        }
+
+        .dx-data-row.dx-row.dx-state-hover:not(.dx-selection):not(.dx-row-inserted):not(.dx-row-removed):not(
+            .dx-edit-row
+          )
+          > td:not(.dx-focused) {
+          background-color: $cell-bgcolor-hover;
+          color: $cell-text-color-hover;
+        }
+
+        .dx-data-row.dx-row-alt.dx-state-hover:not(.dx-selection):not(.dx-row-inserted):not(.dx-row-removed):not(
+            .dx-edit-row
+          )
+          > td:not(.dx-focused) {
+          background-color: $cell-alt-bgcolor-hover;
+          color: $cell-alt-text-color-hover;
+        }
+
+        .dx-row > td,
+        .dx-row > tr > td {
+          color: $cell-text-color;
+        }
+
+        .dx-row.dx-data-row.dx-column-lines.e1-disabled-row > td {
+          background-color: $cell-disabled-bgcolor;
+          color: $cell-disabled-text-color;
+
+          .dx-checkbox-icon {
+            color: $cell-disabled-checkbox-bgcolor;
+          }
+        }
+
+        .dx-row.dx-data-row.dx-column-lines.dx-row-alt.e1-disabled-row > td {
+          background-color: $cell-alt-disabled-bgcolor;
+          color: $cell-alt-disabled-text-color;
+        }
+
+        .dx-column-lines > td {
+          border-color: $cell-alt-border-color !important;
+          background-color: $cell-alt-bgcolor;
+        }
+
+        .dx-editor-cell {
+          .dx-texteditor {
+            background: transparent !important;
+
+            input {
+              &:focus {
+                border: 1px dashed $cell-editor-border-color;
+                font-weight: 600;
+              }
+            }
+          }
+        }
+
+        .dx-edit-row {
+          &[aria-selected='true'] {
+            .dx-editor-cell {
+              .dx-texteditor {
+                background: transparent !important;
+
+                input {
+                  &:focus {
+                    border: 1px dashed $cell-editor-selected-cell-border-color;
+                    font-weight: 600;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .dx-menu-item-expanded {
+          background-color: variables.$tokyo-00;
+        }
+
+        .e1-disabled-row {
+          pointer-events: none;
+
+          td {
+            pointer-events: none;
+          }
+        }
+      }
+    }
+
+    .dx-datagrid-rowsview {
+      .dx-row.dx-data-row.dx-column-lines {
+        &.dx-edit-row {
+          &[aria-selected='true'] {
+            > td {
+              input {
+                color: $cell-editor-selected-cell-text-color;
+                font-weight: 600;
+              }
+
+              background-color: $cell-editor-selected-cell-bgcolor;
+
+              .dx-checkbox-icon {
+                color: $cell-editor-selected-cell-checkbox-bgcolor;
+              }
+            }
+
+            .dx-command-edit.dx-command-edit-with-icons {
+              .e1-icon {
+                color: $cell-selected-action-icon-color;
+
+                &:hover {
+                  color: $cell-selected-action-icon-color-hover;
+                }
+              }
+            }
+          }
+        }
+
+        &.dx-row-alt.dx-edit-row {
+          &[aria-selected='true'] {
+            > td {
+              background-color: $cell-editor-selected-alt-cell-bgcolor;
+            }
+          }
+        }
+
+        &.dx-selection > td {
+          background-color: $selected-cell-bgcolor;
+          color: $selected-cell-text-color;
+
+          &:not(.dx-editor-cell) {
+            font-family: GermanedgeSans, Arial, Helvetica, sans-serif;
+            font-weight: 600;
+          }
+
+          .dx-checkbox-icon {
+            color: $selected-cell-checkbox-color;
+          }
+        }
+
+        &.dx-row-alt.dx-selection > td {
+          background-color: $selected-cell-alt-bgcolor;
+          color: $selected-cell-alt-text-color;
+
+          &:not(.dx-editor-cell) {
+            font-family: GermanedgeSans, Arial, Helvetica, sans-serif;
+            font-weight: 600;
+          }
+
+          .dx-checkbox-icon {
+            color: $selected-cell-checkbox-color;
+          }
+        }
+
+        &.dx-selection.dx-state-hover > td {
+          background-color: $selected-cell-bgcolor-hover;
+          color: $selected-cell-text-color-hover;
+        }
+
+        &.dx-row-alt.dx-selection.dx-state-hover > td {
+          background-color: $selected-cell-alt-bgcolor-hover;
+          color: $selected-cell-alt-text-color-hover;
+        }
+
+        &.dx-row-focused {
+          outline: 1px dashed variables.$tokyo-90;
+          outline-offset: -1px;
+
+          > td {
+            background-color: $cell-bg-color;
+          }
+
+          &.dx-row-alt > td {
+            background-color: $cell-alt-bgcolor;
+          }
+        }
+
+        &.dx-selection {
+          .dx-command-edit.dx-command-edit-with-icons {
+            .e1-icon {
+              color: $cell-selected-action-icon-color;
+
+              &:hover {
+                color: $cell-selected-action-icon-color-hover;
+              }
+            }
+          }
+        }
+      }
+
+      .dx-command-edit.dx-command-edit-with-icons {
+        .e1-icon {
+          color: $cell-action-icon-color;
+
+          &:hover {
+            color: $cell-action-icon-color-hover;
+          }
+        }
+      }
+    }
+
+    .dx-datagrid-search-text {
+      background: variables.$brand-30;
+      color: variables.$tokyo-00;
+    }
+
+    .dx-scrollable-scroll-content {
+      background-color: variables.$tokyo-100 !important;
+      border-radius: 8px;
+    }
+
+    .dx-scrollable-scrollbar {
+      background: variables.$tokyo-20;
+      border-top: 1px solid variables.$tokyo-30;
+      border-left: 1px solid variables.$tokyo-30;
+    }
+
+    .dx-datagrid-columns-separator {
+      &:not(.dx-datagrid-columns-separator-transparent),
+      &:hover {
+        background-color: variables.$tokyo-90;
+      }
+    }
+
+    .dx-link-icon {
+      color: variables.$white !important;
+    }
+
+    .dx-checkbox-icon {
+      color: variables.$white;
+    }
+
+    .dx-datagrid-bottom-load-panel {
+      background: variables.$tokyo-20;
+    }
+  }
+
+  /* Column chooser */
+  .dx-datagrid-column-chooser {
+    .dx-toolbar {
+      background: variables.$tokyo-20;
+      color: variables.$tokyo-80;
+    }
+
+    .dx-overlay-content {
+      filter: drop-shadow(0 0 8px rgb(15 14 13 / 0.24));
+    }
+
+    .dx-datagrid-column-chooser-list {
+      background: variables.$tokyo-00;
+    }
+
+    .dx-item.dx-treeview-item.dx-column-chooser-item.dx-datagrid-drag-action {
+      box-shadow: 0 0 4px rgb(15 14 13 / 0.24);
+      background: variables.$tokyo-20;
+
+      .dx-item-content {
+        color: variables.$tokyo-70 !important;
+      }
+    }
+  }
+
+  /* dragged column header */
+
+  .dx-datagrid-drag-header {
+    border: 1px dashed variables.$tokyo-90;
+    color: variables.$white;
+    background: variables.$tokyo-00;
+  }
+
+  .dx-treeview-select-all-item {
+    .dx-checkbox-container {
+      display: flex;
+      align-items: center;
+    }
+
+    &.dx-checkbox-checked {
+      .dx-checkbox-icon {
+        &::before {
+          content: var(--icon-checkbox-filled);
+        }
+      }
+    }
+
+    &.dx-checkbox-indeterminate {
+      .dx-checkbox-icon {
+        &::before {
+          content: var(--icon-checkbox-preselect);
+        }
+      }
+    }
+  }
+
+  .dx-datebox-wrapper {
+    .dx-calendar {
+      background: $cell-alt-bgcolor;
+
+      thead th {
+        color: variables.$tokyo-50;
+      }
+    }
+
+    .dx-calendar-navigator {
+      .dx-calendar-navigator-previous-view,
+      .dx-calendar-navigator-next-view {
+        &.dx-state-hover,
+        &.dx-state-active {
+          .dx-icon::before {
+            color: $cell-text-color-hover;
+          }
+        }
+      }
+    }
+
+    .dx-calendar-cell {
+      color: $cell-text-color;
+
+      &.dx-calendar-selected-date {
+        background-color: variables.$brand-100;
+        color: $selected-cell-text-color;
+
+        &.dx-calendar-today span {
+          border-bottom: 1px solid $selected-cell-text-color;
+        }
+      }
+
+      &.dx-calendar-today span {
+        border-bottom: 1px solid variables.$white;
+      }
+
+      &.dx-calendar-other-view {
+        color: variables.$tokyo-50;
+
+        &.dx-state-hover,
+        &.dx-state-active {
+          span {
+            color: variables.$tokyo-50;
+          }
+        }
+      }
+    }
+  }
+
+  .dx-datagrid-filter-range-overlay {
+    .dx-editor-container {
+      .dx-texteditor-container,
+      .dx-texteditor-input {
+        background: $cell-alt-bgcolor;
+      }
+
+      .dx-datebox-calendar {
+        border: 1px solid $cell-alt-border-color;
+
+        &.dx-state-focused {
+          border: 1px dashed $cell-focus-color;
+        }
+
+        &:not(.dx-dropdowneditor-active) {
+          .dx-dropdowneditor-button {
+            &:hover {
+              .dx-dropdowneditor-icon {
+                &::before {
+                  color: $cell-text-color-hover;
+                }
+              }
+            }
+          }
+        }
+
+        .dx-dropdowneditor-icon {
+          &::before {
+            color: $cell-text-color;
+          }
+        }
+      }
+    }
+  }
+}

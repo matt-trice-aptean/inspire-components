@@ -1,0 +1,35 @@
+$font-family-sans-serif: 'GermanedgeSans';
+$font-family-base: 'GermanedgeSans';
+$border-radius: 0;
+$grid-columns: 24;
+$modal-content-border-width: 0;
+$popover-body-padding-y: 0;
+$popover-body-padding-x: 0;
+$popover-border-width: 0;
+$grid-gutter-widths: (
+  sm: 0,
+  md: 12px,
+  lg: 12px,
+  xl: 16px,
+  xxl: 26px,
+  // xxxl: 30px
+);
+$grid-paddings: (
+  sm: 4px,
+  md: 8px,
+  lg: 8px,
+  xl: 16px,
+  xxl: 24px,
+  // xxxl: 80px
+);
+
+// Z Index
+$zindex-dropdown: 1000;
+$zindex-sticky: 1020;
+$zindex-fixed: 1030;
+$zindex-modal-backdrop: 1040;
+$zindex-modal: 1050;
+$zindex-popover: 1060;
+$zindex-unfolding: 1060;
+$zindex-tooltip: 1070;
+$enable-negative-margins: true;

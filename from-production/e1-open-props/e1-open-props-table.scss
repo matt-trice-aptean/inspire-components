@@ -1,0 +1,27 @@
+@mixin open-props-table-styles {
+  table {
+    caption-side: bottom;
+    border-collapse: collapse;
+
+    tbody,
+    thead,
+    tr,
+    td,
+    th {
+      border-color: inherit;
+      border-style: solid;
+      border-width: 0;
+    }
+
+    th {
+      text-align: inherit;
+      text-align: -webkit-match-parent;
+    }
+
+    caption {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      text-align: left;
+    }
+  }
+}
