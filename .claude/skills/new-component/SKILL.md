@@ -161,7 +161,7 @@ body → background: var(--color-surface-subtle); padding: 40px 24px
 
 **Tab order:** Spec tab is first and the default active tab on page load.
 
-- **[Name]-spec.md** — the full embedded spec rendered as markdown via marked.js. Tab label and download filename are set dynamically from the `component` and `id` fields in the YAML frontmatter. Includes a "Download [id]-spec.md" link at the **top** of the tab (above the rendered markdown) that triggers a file download of `[id].md` from the same directory.
+- **[Name]-spec.md** — the full embedded spec rendered as markdown via marked.js. Tab label and download filename are set dynamically from the `component` and `id` fields in the YAML frontmatter. Includes a "Download [id]-spec.md" link **right-aligned in the tab bar** (inline with the tab buttons) that triggers a file download of `[id].md` from the same directory.
 - **HTML** — syntax-highlighted markup for each state variant
 - **CSS Variables** — all component variables with semantic token mappings and dark mode overrides
 - **Variable Reference** — table with 6 columns: `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`. One row group per visual element.

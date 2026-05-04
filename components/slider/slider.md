@@ -22,8 +22,6 @@ last-updated: 2026-05-01
 **Status:** Draft · **Modes:** ADK (Light) + TDK (Dark) · **Library:** DevExtreme dxSlider  
 **Prototype:** `components/slider/slider.html` · **Figma:** [ADK / Slider](https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089)
 
----
-
 ## Who reads what
 
 | Section | Designer | Front End | Product | Agent |
