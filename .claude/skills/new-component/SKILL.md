@@ -1,7 +1,7 @@
 ---
 name: new-component
-description: Build a new ADK/TDK design system component. Minimum input is a component name and a source library URL (DevExtreme or other). Produces a self-contained HTML prototype and a machine-authoritative markdown spec. Optionally creates Figma frames.
-when_to_use: When a designer, product person, or developer wants to add a new component to the Edge One (ADK/TDK) design system.
+description: Build a new ADK/TDK design system component. Minimum input is a component name and a source library URL (DevExtreme or other). Produces a self-contained HTML prototype and a machine-authoritative markdown spec. Optionally creates Figma frames. Requires Claude Code CLI — not available in the desktop app or web UI.
+when_to_use: When a designer, product person, or developer wants to add a new component to the Edge One (ADK/TDK) design system using Claude Code CLI.
 ---
 
 # ADK — New Component Skill
@@ -144,7 +144,7 @@ Create `components/[id]/[id].html`. Read `components/slider/slider.html` to cali
 - **Font:** `Inter Tight` for condensed / headings; `Inter` for body. Load from Google Fonts.
 - **Border radius:** `0` — square corners everywhere. Exception: slider track uses `2px` (documented).
 - **Focus rings:** `outline: 2px dashed [focus-color]; outline-offset: 0px` — at the element edge.
-- **Disabled:** `pointer-events: none; cursor: not-allowed;`
+- **Disabled:** `cursor: not-allowed` on the root disabled element (e.g. `.dx-state-disabled`). Do not set `pointer-events: none` on interactive child elements — it prevents the cursor from displaying. Interaction is blocked via the JS guard (`if (slider.classList.contains('dx-state-disabled')) return;`) rather than pointer-events.
 - **Spacing:** all gaps must be explicit CSS variables set to a value, never omitted.
 
 ### Page layout
@@ -161,7 +161,7 @@ body → background: var(--color-surface-subtle); padding: 40px 24px
 
 **Tab order:** Spec tab is first and the default active tab on page load.
 
-- **[Name]-spec.md** — the full embedded spec rendered as markdown via marked.js. Tab label and download filename are set dynamically from the `component` and `id` fields in the YAML frontmatter. Includes a "Download [id]-spec.md" link at the bottom of the tab that triggers a file download of `[id].md` from the same directory.
+- **[Name]-spec.md** — the full embedded spec rendered as markdown via marked.js. Tab label and download filename are set dynamically from the `component` and `id` fields in the YAML frontmatter. Includes a "Download [id]-spec.md" link at the **top** of the tab (above the rendered markdown) that triggers a file download of `[id].md` from the same directory.
 - **HTML** — syntax-highlighted markup for each state variant
 - **CSS Variables** — all component variables with semantic token mappings and dark mode overrides
 - **Variable Reference** — table with 6 columns: `CSS Variable | Figma Variable | ADK value + alias | ADK swatch | TDK value + alias | TDK swatch`. One row group per visual element.
@@ -183,7 +183,7 @@ Include only if a Figma URL was provided. Use the 5-shape Figma SVG mark (see `c
 After both files are created, add a row to `components/README.md`:
 
 ```md
-| [Name] | `[id]` | Draft | [figma-node](figma-url) | [id].html](id/id.html) | [id.md](id/id.md) |
+| [Name] | `[id]` | Draft | [figma-node](figma-url) | [Live demo](https://matt-trice-aptean.github.io/inspire-components/components/[id]/[id].html) | [id].md]([id]/[id].md) |
 ```
 
 ---
