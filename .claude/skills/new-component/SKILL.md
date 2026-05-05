@@ -14,6 +14,16 @@ Runs the full new-component workflow for Edge One / Germanedge. Produces a visua
 
 ---
 
+## Prerequisites
+
+| Requirement | Details |
+|---|---|
+| **Claude Code CLI** | Required. Skills run in the CLI only — they don't work in Claude Desktop or the Claude.ai web UI. Install: `npm install -g @anthropic-ai/claude-code` |
+| **Figma MCP plugin** | Required only for Step 8 (Figma frame creation). Install via Claude Code: `/mcp add figma` |
+| **GitHub account** | Optional. Needed only if you want a shareable live-demo URL (Step 7 explains setup for first-timers). |
+
+---
+
 ## 1. Gather Inputs
 
 | # | Input | Required | Notes |
@@ -23,6 +33,22 @@ Runs the full new-component workflow for Edge One / Germanedge. Produces a visua
 | 3 | **States** | Infer | Derive from library docs and present to user for confirmation before building. |
 | 4 | **Figma URL** | Optional | Existing Figma node to reference for variable values. If provided, use Figma MCP to extract bindings. |
 | 5 | **Create Figma frames?** | Opt-in | Ask explicitly. If yes, use the `figma-use` skill after spec and prototype are complete. |
+
+**Minimum invocation:**
+```
+/new-component
+Component: Checkbox
+Library URL: https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxCheckBox/
+```
+
+**With all optional inputs:**
+```
+/new-component
+Component: Checkbox
+Library URL: https://js.devexpress.com/Documentation/ApiReference/UI_Components/dxCheckBox/
+Figma URL: https://www.figma.com/design/yck1tcUXgdQ5aYX6iUAwrO/GE---Astronaut-Design-System?node-id=22145-141089
+Create Figma frames? Yes
+```
 
 ---
 
@@ -53,7 +79,7 @@ Note out-of-scope variants explicitly — these go in the spec's Open Questions.
 
 For each visual property, assign a tier:
 
-**Tier 1 — Shared semantic tokens (default).** Use when the role maps cleanly to: `--color-surface-*`, `--color-text-*`, `--color-border-*`, `--color-icon-*`, `--color-brand-*`, `--color-status-*`.
+**Tier 1 — Shared semantic tokens (default).** Use when the role maps cleanly to: `--color-surface-*`, `--color-text-*`, `--color-border-*`, `--color-icon-*`, `--color-brand-*`, `--color-status-*`. The canonical token list lives in the Figma ADS file (`yck1tcUXgdQ5aYX6iUAwrO`), Variables page (`21891:8273`), **SHARED SEMANTIC** collection — use the Figma MCP to read the current variable names and values for both ADK (light) and TDK (dark) modes before writing any `:root` block.
 
 **Tier 2 — Component-scoped variables (exception only).** Use when the component has unique visual roles with no semantic equivalent (e.g. a filled track, a circular handle, an inner stroke). Naming: `--[component]-[element]-[property]-[state]`.
 
@@ -106,7 +132,16 @@ last-updated: [YYYY-MM-DD]
 - Figma Variable: exact path in the Figma collection (e.g. `Slider/Track/Default`). Never use CSS variable names here. If unknown, write `Unknown — requires Figma inspection`.
 - Collection: `COMPONENTS` or `SHARED SEMANTIC`
 
-**4. Dimension Tokens** — table: `CSS Variable | Selector → Property | Value | Notes`. No Figma columns (dimensions are not Figma variables).
+**4. Dimension Tokens** — table: `CSS Variable | Selector → Property | Value | Figma Variable | Notes`.
+
+Spacing variables live in the **SPACING collection** in the ADS Figma file. The collection has two tiers:
+- **Primitives** — raw numeric values covering the full style guide scale. Not applied directly in design; they back the semantic layer.
+- **Semantic (`Gap/` and `Padding/`)** — variables like `Gap/Gap-08`, `Padding/Padding-24`. Built on top of primitives but **not exhaustive** — only values that have been needed in production screens exist. Do not assume a semantic token exists for every primitive value.
+
+**When populating the Figma Variable column:**
+1. Check the SPACING collection for a `Gap/` or `Padding/` semantic variable matching the needed value. Use it if found (e.g. `Gap/Gap-08`).
+2. If no semantic variable exists for that value, fall back to the primitive and note it: `SPACING primitive — no semantic alias yet`.
+3. Never fabricate a semantic token name. If unknown, write `Unknown — requires Figma inspection`.
 
 **5. HTML Structure** — code blocks for each structural variant. Table of DevExtreme runtime state classes.
 
@@ -134,7 +169,7 @@ Create `components/[id]/[id].html`. Read `components/slider/slider.html` to cali
 
 ### CSS structure (in order)
 
-1. **Semantic tokens, light mode** — full `:root` block (copy from slider.html, do not omit any tokens)
+1. **Semantic tokens, light mode** — full `:root` block. Fetch current values from the Figma ADS file (`yck1tcUXgdQ5aYX6iUAwrO`), Variables page (`21891:8273`), **SHARED SEMANTIC** collection, ADK mode. Do not copy from slider.html — Figma is the source of truth and slider.html may be stale.
 2. **Component variables** — `:root` block with `--[component]-*` vars referencing semantic tokens
 3. **Dark mode overrides** — `html[data-theme="dark"]` block: semantic overrides + component explicit overrides (annotated `†`)
 4. **Component CSS** — base structure, then one block per state
@@ -180,11 +215,35 @@ Include only if a Figma URL was provided. Use the 5-shape Figma SVG mark (see `c
 
 ## 7. Update the Registry
 
-After both files are created, add a row to `components/README.md`:
+After both files are created, add a row to `components/README.md`. If the user has GitHub Pages set up, include a live demo link; otherwise use `—` for that column.
 
 ```md
-| [Name] | `[id]` | Draft | [figma-node](figma-url) | [Live demo](https://matt-trice-aptean.github.io/inspire-components/components/[id]/[id].html) | [id].md]([id]/[id].md) |
+| [Name] | `[id]` | Draft | [Figma]([figma-url]) | [Live demo](https://[github-username].github.io/inspire-components/components/[id]/[id].html) | [id].md]([id]/[id].md) |
 ```
+
+### Live demo URL — optional but recommended
+
+A live demo URL lets you share the prototype with anyone on the team via a plain link, no local setup needed. It requires GitHub Pages.
+
+**If the user already has GitHub Pages set up**, use their URL pattern above and move on.
+
+**If the user has no GitHub account**, walk them through the following. Do not assume any prior GitHub knowledge — offer to guide each step interactively if they want help.
+
+1. **Create a GitHub account**
+   Go to [github.com/signup](https://github.com/signup). Use your work email. Username will appear in the live URL (e.g. `jane-doe-aptean`).
+
+2. **Fork the inspire-components repo**
+   Go to the inspire-components repo on GitHub and click the **Fork** button (top right). This creates your own copy under your account.
+
+3. **Enable GitHub Pages on your fork**
+   In your fork, go to **Settings → Pages**. Under **Source**, choose **Deploy from a branch**, select the **main** branch and **/ (root)** folder, then click **Save**.
+
+4. **Wait ~1 minute**, then your prototype is live at:
+   `https://[your-username].github.io/inspire-components/components/[id]/[id].html`
+
+5. **Push your new component files** to your fork's main branch. GitHub Pages will update automatically within a minute or two.
+
+> If the user gets stuck at any step, offer to walk through it interactively. GitHub account creation, forking, and Pages setup are one-time tasks.
 
 ---
 
@@ -229,7 +288,112 @@ Example: the DevExtreme `dxSlider` component is published in Figma as `Slider`.
 
 ---
 
-## 9. Wrap up
+## 9. Acceptance Check
+
+Run this check after the spec and prototype are complete, before wrapping up. The agent performs all checks and produces a structured report for the human reviewer. The reviewer may be the same designer who submitted the component.
+
+**All items marked ⛔ are blockers — the component cannot be accepted until they are resolved.**
+
+---
+
+### How to run the check
+
+1. Read the component's Color Tokens table from the spec.
+2. Cross-reference each token's ADK+TDK hex pair against the SHARED SEMANTIC set (see memory: `reference_csv_semantic_mapping.md` and `reference_semantic_consolidation_map.md`).
+3. Check spacing values against the SPACING collection (see memory: `reference_figma_spacing.md`).
+4. Inspect the HTML prototype and spec for cross-component variable borrowing, border radius deviations, missing dark mode values, and state completeness.
+5. Output the report below.
+
+---
+
+### Report format
+
+```
+# Acceptance Check — [Component Name]
+Date: [YYYY-MM-DD]
+Spec: components/[id]/[id].md
+Reviewer: [name or "self-review"]
+
+---
+
+## 1. Semantic Variable Compliance ⛔ BLOCKER if any row is FAIL
+
+For each color token:
+| Token | ADK hex | TDK hex | Status | Action |
+|---|---|---|---|---|
+| --[component]-[token] | #xxxxxx | #xxxxxx | ✅ PASS / ⛔ FAIL / ⚠️ DRIFT / — NO MATCH | [what to do] |
+
+Status key:
+  ✅ PASS      — already references a semantic token, or no semantic equivalent exists (gap)
+  ⛔ FAIL      — a direct semantic replacement exists and is not being used (blocker)
+  ⚠️ DRIFT     — ADK matches a semantic token but TDK value diverged (needs design decision)
+  — NO MATCH  — no semantic equivalent exists yet (acceptable, flag for future semantic set expansion)
+
+## 2. Spacing Compliance ⛔ BLOCKER if any value is hardcoded without a variable
+
+| CSS Variable | Value | SPACING alias | Status |
+|---|---|---|---|
+| --[component]-[spacing-var] | 0px | Gap/Gap-08 or primitive | ✅ / ⛔ |
+
+## 3. Cross-Component Variable Borrowing ⛔ BLOCKER if any found
+
+List any instance where this component's CSS references a variable scoped to a different component (e.g. `--input-*` used inside a chat component).
+
+  None found ✅
+  — OR —
+  ⛔ [variable name] — belongs to [other component], used in [this component element]
+
+## 4. State Completeness
+
+| State | Present | Notes |
+|---|---|---|
+| Default | ✅ / ⛔ | |
+| Hover | ✅ / ⛔ / N/A | |
+| Focus | ✅ / ⛔ / N/A | |
+| Active | ✅ / ⛔ / N/A | |
+| Disabled | ✅ / ⛔ / N/A | |
+| Error | ✅ / ⛔ / N/A | |
+
+Any state marked absent must be explicitly listed as out-of-scope in the spec's Open Questions section.
+
+## 5. Border Radius Compliance ⛔ BLOCKER if deviation is undocumented
+
+Global rule: 0px everywhere.
+Documented exceptions: slider track (2px), chat list item (2px).
+
+  Compliant ✅
+  — OR —
+  ⛔ [element] uses [value] — not documented as an exception
+
+## 6. Dark Mode Completeness ⛔ BLOCKER if any token has no TDK value
+
+All color tokens must have an explicit TDK value. Tokens with a blank or missing TDK entry are blockers.
+
+  All tokens have TDK values ✅
+  — OR —
+  ⛔ [token name] — TDK value missing
+
+## 7. Token Naming Convention
+
+Component-scoped vars must follow: --[component]-[element]-[property]-[state]
+Generic palette aliases (e.g. Generic/Theme/Theme 80, All Theme 50) are not acceptable as component token values — they must resolve through a semantic token or a properly named component var.
+
+  Compliant ✅
+  — OR —
+  ⛔ [token name] — uses generic alias directly
+
+---
+
+## Summary
+
+  PASS — ready for Figma binding and registry entry
+  — OR —
+  FAIL — [N] blockers must be resolved before acceptance (list them)
+```
+
+---
+
+## 10. Wrap up
 
 - Confirm output paths: `components/[id]/[id].html` and `components/[id]/[id].md`
 - Note any `Unknown — requires Figma inspection` entries — these are designer action items
